@@ -100,7 +100,7 @@ public class Parser
 
                 String description = extractPattern(currEntry,"(?<=.W\\n).*");
                 if(!description.isEmpty()) {
-                    doc.add(new TextField(FieldNames.DESCRIPTION.getName(), description, Field.Store.YES));
+                    doc.add(new TextField(FieldNames.DESCRIPTION.getName(), description, Field.Store.NO));
                     empty = false;
                 }
                 //if the document contained nothing but an id -> do not add it to the index
