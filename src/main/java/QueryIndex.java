@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class QueryIndex {
 
     //<! The maximum number of search results that are retrieved for a query
-    private final short MAX_RESULTS = 20;
+    private final short MAX_RESULTS = 1400;
     //<! The location where the file with the rankings of the queries is stored
     private final String RANKINGS_LOCATION = "../../rankings.txt";
     //<!
