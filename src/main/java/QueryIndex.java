@@ -15,9 +15,9 @@ import java.util.HashMap;
 
 public class QueryIndex {
     //<! The maximum number of search results that are retrieved for a query
-    private final short MAX_RESULTS = 1400;
+    private final short cMAX_RESULTS = 1400;
     //<! The location where the file with the rankings of the queries is stored
-    private final String RANKINGS_LOCATION = "../../rankings.txt";
+    private final String cRANKINGS_LOCATION = "../../rankings.txt";
     //<! identifier for the analyzer that is to be created from AnalyzerSimilarityFactory
     private String mAnalyzerString;
     //<! identifier for the similarity that is to be created from AnalyzerSimilarityFactory
@@ -49,11 +49,12 @@ public class QueryIndex {
                 FieldNames.DESCRIPTION.getName()},
                 AnalyzerSimilarityFactory.getAnalyzer(mAnalyzerString));
 
-        PrintWriter writer = new PrintWriter(RANKINGS_LOCATION, StandardCharsets.UTF_8);
-
+        PrintWriter writer = new PrintWriter(cRANKINGS_LOCATION, StandardCharsets.UTF_8);
+        System.out.println("Started querying");
         for (int id : queries.keySet()) {
+            //parse the current query and
             Query query = parser.parse(QueryParser.escape(queries.get(id)));
-            ScoreDoc[] hits = indexSearcher.search(query, MAX_RESULTS).scoreDocs;
+            ScoreDoc[] hits = indexSearcher.search(query, cMAX_RESULTS).scoreDocs;
 
             for (ScoreDoc hit : hits)
             {
@@ -62,8 +63,10 @@ public class QueryIndex {
             }
         }
 
+        //close everything we used
         writer.close();
         directoryReader.close();
         directory.close();
+        System.out.println("Finished querying");
     }
 }

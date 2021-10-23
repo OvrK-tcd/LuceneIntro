@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class Parser
 {
     // <!constant for an empty string
-    private final String EMPTY_STRING = "";
+    private final String cEMPTY_STRING = "";
     //<! identifier for the analyzer that is to be created from AnalyzerSimilarityFactory
     private String mAnalyzerString;
     //<! identifier for the similarity that is to be created from AnalyzerSimilarityFactory
@@ -43,7 +43,7 @@ public class Parser
         if (matcher.find()) {
             return matcher.group(0);
         }
-        return EMPTY_STRING;
+        return cEMPTY_STRING;
     }
 
     /**
@@ -67,34 +67,42 @@ public class Parser
         try {
             String content = new String(Files.readAllBytes(Paths.get(file)));
             System.out.printf("Indexing \"%s\"\n", file);
+            //split the document into the single entries
             String[]entries = content.split("(?=.I \\d{1,4}\\n)");
             for (String currEntry : entries)
             {
+                //create a new document and add the respective fields
                 Document doc = new Document();
                 boolean empty = true;
+
+                //extract id
                 String id = extractPattern(currEntry,"(?<=.I )\\d{1,4}");
                 if(!id.isEmpty()) {
                     doc.add(new TextField(FieldNames.ID.getName(), id, Field.Store.YES));
                 }
 
+                //extract title
                 String title = extractPattern(currEntry,"(?<=.T\\n).*?(?=.A\\n)");
                 if(!title.isEmpty()) {
                     doc.add(new TextField(FieldNames.TITLE.getName(), title, Field.Store.YES));
                     empty = false;
                 }
 
+                //extract author
                 String authors = extractPattern(currEntry,"(?<=.A\\n).*?(?=.B\\n)");
                 if(!authors.isEmpty()) {
                     doc.add(new TextField(FieldNames.AUTHOR.getName(), authors, Field.Store.YES));
                     empty = false;
                 }
 
+                //extract bibliography
                 String bibliography = extractPattern(currEntry,"(?<=.B\\n).*?(?=.W\\n)");
                 if(!bibliography.isEmpty()) {
                     doc.add(new TextField(FieldNames.BIBLIOGRAPHY.getName(), bibliography, Field.Store.YES));
                     empty = false;
                 }
 
+                //extract description
                 String description = extractPattern(currEntry,"(?<=.W\\n).*");
                 if(!description.isEmpty()) {
                     doc.add(new TextField(FieldNames.DESCRIPTION.getName(), description, Field.Store.NO));
@@ -113,7 +121,8 @@ public class Parser
             directory.close();
             return false;
         }
-
+    
+        //add the created documents to the index and close everything
         indexWriter.addDocuments(documents);
         indexWriter.close();
         directory.close();
@@ -122,29 +131,32 @@ public class Parser
     }
 
     /**
-     * This method extracts the queries from the cran.qry file
+     * This method extracts the queries from the cran.qry file and writes them
+     * to a <Integer,String> map (id of the query is mapped to the search text).
      *
      * @param queryFileLocation the location of the file which contains the queries
      * @return a map <Integer,String> which maps id of a query to its search text
-     * @throws IOException if the query file could not be read in
+     * @throws IOException if the cran query file could not be read in
      */
     public HashMap<Integer,String> createQueries(String queryFileLocation) throws IOException {
-        System.out.println("Started querying");
-        HashMap<Integer,String> resultMap = new HashMap<>();
+        System.out.println("Started extracting queries");
+        HashMap<Integer,String> queryMap = new HashMap<>();
         String content = new String(Files.readAllBytes(Paths.get(queryFileLocation)));
 
-        String[]entries = content.split("(?=.I \\d{1,4}\\n)");
+        //split the document into the single queries
+        String[]queries = content.split("(?=.I \\d{1,4}\\n)");
         int id = 1;
-        for (String currEntry : entries)
+        for (String currQuery : queries)
         {
-            String description = extractPattern(currEntry,"(?<=.W\\n).*");
+            //extract the query text
+            String queryText = extractPattern(currQuery,"(?<=.W\\n).*");
 
-            if(!description.isEmpty()) {
-                resultMap.put(id,description);
+            if(!queryText.isEmpty()) {
+                queryMap.put(id,queryText);
             }
             id++;
         }
-        System.out.println("Finished querying");
-        return resultMap;
+        System.out.println("Finished extracting queries");
+        return queryMap;
     }
 }
