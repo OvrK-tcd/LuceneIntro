@@ -60,7 +60,6 @@ public class Parser
             String content = new String(Files.readAllBytes(Paths.get(file)));
             System.out.printf("Indexing \"%s\"\n", file);
             String[]entries = content.split("(?=.I \\d{1,4}\\n)");
-            System.out.println(entries[0]);
             for (String currEntry : entries)
             {
                 Document doc = new Document();
@@ -123,23 +122,16 @@ public class Parser
         HashMap<Integer,String> resultMap = new HashMap<>();
         String content = new String(Files.readAllBytes(Paths.get(file)));
         String[]entries = content.split("(?=.I \\d{1,4}\\n)");
+        int id = 1;
         for (String currEntry : entries)
         {
-            int id;
-            try {
-                id = Integer.parseInt(extractPattern(currEntry,"(?<=.I )\\d{1,4}"));
-            }
-            catch (NumberFormatException e)
-            {
-                System.out.println("parseQueries: entry had no valid id.");
-                continue;
-            }
             String description = extractPattern(currEntry,"(?<=.W\\n).*");
             if(!description.isEmpty()) {
                 resultMap.put(id,description);
             }
+            id++;
         }
-
+        System.out.println(resultMap.size());
         return resultMap;
     }
 }

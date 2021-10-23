@@ -13,7 +13,7 @@ public class LuceneSearchEngine {
             if(parser.parseIndex(args[0],INDEX_DIRECTORY_LOCATION)) {
                 HashMap<Integer,String> queries  = parser.parseQueries(args[1]);
                 QueryIndex queryIndex = new QueryIndex();
-                queryIndex.query(queries.get(1),INDEX_DIRECTORY_LOCATION);
+                queryIndex.queryMap(queries,INDEX_DIRECTORY_LOCATION);
             }
             else {
                 System.out.println("Error. Could not create index");
