@@ -5,6 +5,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -20,15 +21,24 @@ import java.util.regex.Pattern;
 
 public class Parser
 {
-    // <!Directory where the search index will be saved
+    // <!constant for an empty string
     private final String EMPTY_STRING = "";
+    //<!
+    private String mAnalyzerString;
+    //<!
+    private String mSimilarityString;
+
+    Parser(String analyzer, String similarity) {
+        mAnalyzerString = analyzer;
+        mSimilarityString = similarity;
+    }
 
     /**
-        TODO: Description
+        Extracts a substring from a string based on a regular expression
 
-        @param input test
-        @param regex test
-        @return Test
+        @param input the input string
+        @param regex the regular expression
+        @return the extracted substring. Return an empty string, if the regex did not match
      */
     private String extractPattern(String input, String regex) {
         Pattern p = Pattern.compile(regex,Pattern.DOTALL);
@@ -40,21 +50,22 @@ public class Parser
     }
 
     /**
-        TODO: Description
+        This method extracts all the relevant info from the cran dataset that we need for
+        creating the index. This method creates the index after extraction
 
-        @param file
-        @return
+        @param file location of the cran dataset
+        @param indexDirectoryLocation location where the created index should be stored
+        @return true if parsing was successful. Otherwise, false
      */
-    public boolean parseIndex(String file, String indexDirectoryLocation) throws IOException {
-
-        Analyzer analyzer = new StandardAnalyzer();
-        ArrayList<Document> documents = new ArrayList<Document>();
+    public boolean createIndex(String file, String indexDirectoryLocation) throws IOException {
+        ArrayList<Document> documents = new ArrayList<>();
         Directory directory = FSDirectory.open(Paths.get(indexDirectoryLocation));
 
         // Set up an index writer to add process and save documents to the index
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
+        IndexWriterConfig config = new IndexWriterConfig(AnalyzerSimilarityFactory.getAnalyzer(mAnalyzerString));
+        config.setSimilarity(AnalyzerSimilarityFactory.getSimilarity(mSimilarityString));
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-        IndexWriter iwriter = new IndexWriter(directory, config);
+        IndexWriter indexWriter = new IndexWriter(directory, config);
 
         try {
             String content = new String(Files.readAllBytes(Paths.get(file)));
@@ -66,32 +77,33 @@ public class Parser
                 boolean empty = true;
                 String id = extractPattern(currEntry,"(?<=.I )\\d{1,4}");
                 if(!id.isEmpty()) {
-                    doc.add(new TextField("id", id, Field.Store.YES));
+                    doc.add(new TextField(FieldNames.ID.getName(), id, Field.Store.YES));
                 }
 
                 String title = extractPattern(currEntry,"(?<=.T\\n).*?(?=.A\\n)");
                 if(!title.isEmpty()) {
-                    doc.add(new TextField("title", title, Field.Store.YES));
+                    doc.add(new TextField(FieldNames.TITLE.getName(), title, Field.Store.YES));
                     empty = false;
                 }
 
                 String authors = extractPattern(currEntry,"(?<=.A\\n).*?(?=.B\\n)");
                 if(!authors.isEmpty()) {
-                    doc.add(new TextField("authors", authors, Field.Store.YES));
+                    doc.add(new TextField(FieldNames.AUTHOR.getName(), authors, Field.Store.YES));
                     empty = false;
                 }
 
                 String bibliography = extractPattern(currEntry,"(?<=.B\\n).*?(?=.W\\n)");
                 if(!bibliography.isEmpty()) {
-                    doc.add(new TextField("bibliography", bibliography, Field.Store.YES));
+                    doc.add(new TextField(FieldNames.BIBLIOGRAPHY.getName(), bibliography, Field.Store.YES));
                     empty = false;
                 }
 
                 String description = extractPattern(currEntry,"(?<=.W\\n).*");
                 if(!description.isEmpty()) {
-                    doc.add(new TextField("description", description, Field.Store.YES));
+                    doc.add(new TextField(FieldNames.DESCRIPTION.getName(), description, Field.Store.YES));
                     empty = false;
                 }
+                //if the document contained nothing but an id -> do not add it to the index
                 if(!empty)
                 {
                     documents.add(doc);
@@ -100,38 +112,42 @@ public class Parser
         }
         catch (InvalidPathException | NoSuchFileException exception){
             System.out.println("Invalid path! Can not index: " + file);
-            iwriter.close();
+            indexWriter.close();
             directory.close();
             return false;
         }
 
-        iwriter.addDocuments(documents);
-        iwriter.close();
+        indexWriter.addDocuments(documents);
+        indexWriter.close();
         directory.close();
         System.out.println("Indexing finished successfully");
         return true;
     }
 
     /**
+     * This method extracts the queries from the cran.qry file
      *
-     * @param file
-     * @return
-     * @throws IOException
+     * @param queryFileLocation the location of the file which contains the queries
+     * @return a map <Integer,String> which maps id of a query to its search text
+     * @throws IOException if the query file could not be read in
      */
-    public HashMap<Integer,String> parseQueries(String file) throws IOException {
+    public HashMap<Integer,String> createQueries(String queryFileLocation) throws IOException {
+        System.out.println("Started querying");
         HashMap<Integer,String> resultMap = new HashMap<>();
-        String content = new String(Files.readAllBytes(Paths.get(file)));
+        String content = new String(Files.readAllBytes(Paths.get(queryFileLocation)));
+
         String[]entries = content.split("(?=.I \\d{1,4}\\n)");
         int id = 1;
         for (String currEntry : entries)
         {
             String description = extractPattern(currEntry,"(?<=.W\\n).*");
+
             if(!description.isEmpty()) {
                 resultMap.put(id,description);
             }
             id++;
         }
-        System.out.println(resultMap.size());
+        System.out.println("Finished querying");
         return resultMap;
     }
 }

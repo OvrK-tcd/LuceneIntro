@@ -1,4 +1,3 @@
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
@@ -10,28 +9,49 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class QueryIndex {
 
     //<! The maximum number of search results that are retrieved for a query
-    private final short MAX_RESULTS = 10;
+    private final short MAX_RESULTS = 20;
+    //<! The location where the file with the rankings of the queries is stored
+    private final String RANKINGS_LOCATION = "../../rankings.txt";
+    //<!
+    private String mAnalyzerString;
+    //<!
+    private String mSimilarityString;
+
+    QueryIndex(String analyzer, String similarity) {
+        mAnalyzerString = analyzer;
+        mSimilarityString = similarity;
+    }
+
 
     /**
+     *  This function executes a set of queries on a given index and writes the resulting
+     *  hit scores into a file
      *
-     * @param queries
-     * @param directoryLocation
-     * @throws IOException
-     * @throws ParseException
+     * @param queries a map <Integer,String> which maps id of a query to its search text
+     * @param indexDirectoryLocation location where the created index should be stored
+     * @throws IOException when the directory could not be opened
+     * @throws ParseException when a query could not be parsed
      */
-    public void queryMap(HashMap<Integer,String> queries, String directoryLocation) throws IOException, ParseException {
-        Directory directory = FSDirectory.open(Paths.get(directoryLocation));
+    public void queryMap(HashMap<Integer,String> queries, String indexDirectoryLocation) throws IOException, ParseException {
+        Directory directory = FSDirectory.open(Paths.get(indexDirectoryLocation));
         DirectoryReader directoryReader = DirectoryReader.open(directory);
         IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
-        indexSearcher.setSimilarity(new BM25Similarity());
-        MultiFieldQueryParser parser = new MultiFieldQueryParser(new String[]{"title", "authors", "bibliography", "description"},
-                new StandardAnalyzer());
+        indexSearcher.setSimilarity(AnalyzerSimilarityFactory.getSimilarity(mSimilarityString));
+        MultiFieldQueryParser parser = new MultiFieldQueryParser(new String[]{FieldNames.TITLE.getName(),
+                FieldNames.AUTHOR.getName(),
+                FieldNames.BIBLIOGRAPHY.getName(),
+                FieldNames.DESCRIPTION.getName()},
+                AnalyzerSimilarityFactory.getAnalyzer(mAnalyzerString));
+
+        PrintWriter writer = new PrintWriter(RANKINGS_LOCATION, StandardCharsets.UTF_8);
 
         for (int id : queries.keySet()) {
             Query query = parser.parse(QueryParser.escape(queries.get(id)));
@@ -40,11 +60,11 @@ public class QueryIndex {
             for (ScoreDoc hit : hits)
             {
                 Document hitDoc = indexSearcher.doc(hit.doc);
-                System.out.println(id + " 0 " + hitDoc.get("id") + " 0 " + hit.score + " OLIVER");
+                writer.println(id + " 0 " + hitDoc.get("id") + " 0 " + hit.score + " OLIVER");
             }
         }
 
-        // close everything we used
+        writer.close();
         directoryReader.close();
         directory.close();
     }
