@@ -13,6 +13,11 @@ public class LuceneSearchEngine {
 
     public static void main(String[] args)
     {
+        if(args.length != 2)
+        {
+            System.out.println("Wrong number of arguments passed. Expected 2. Actual: " + args.length);
+            System.exit(1);
+        }
         try{
             Parser parser = new Parser(args[0],args[1]);
             if(parser.createIndex(CRAN_DATASET_LOCATION,INDEX_DIRECTORY_LOCATION)) {

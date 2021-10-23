@@ -1,11 +1,8 @@
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -23,9 +20,9 @@ public class Parser
 {
     // <!constant for an empty string
     private final String EMPTY_STRING = "";
-    //<!
+    //<! identifier for the analyzer that is to be created from AnalyzerSimilarityFactory
     private String mAnalyzerString;
-    //<!
+    //<! identifier for the similarity that is to be created from AnalyzerSimilarityFactory
     private String mSimilarityString;
 
     Parser(String analyzer, String similarity) {
@@ -41,10 +38,10 @@ public class Parser
         @return the extracted substring. Return an empty string, if the regex did not match
      */
     private String extractPattern(String input, String regex) {
-        Pattern p = Pattern.compile(regex,Pattern.DOTALL);
-        Matcher m = p.matcher(input);
-        if (m.find()) {
-            return m.group(0);
+        Pattern pattern = Pattern.compile(regex,Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(0);
         }
         return EMPTY_STRING;
     }

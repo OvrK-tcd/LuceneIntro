@@ -4,7 +4,6 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -15,14 +14,13 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class QueryIndex {
-
     //<! The maximum number of search results that are retrieved for a query
     private final short MAX_RESULTS = 1400;
     //<! The location where the file with the rankings of the queries is stored
     private final String RANKINGS_LOCATION = "../../rankings.txt";
-    //<!
+    //<! identifier for the analyzer that is to be created from AnalyzerSimilarityFactory
     private String mAnalyzerString;
-    //<!
+    //<! identifier for the similarity that is to be created from AnalyzerSimilarityFactory
     private String mSimilarityString;
 
     QueryIndex(String analyzer, String similarity) {

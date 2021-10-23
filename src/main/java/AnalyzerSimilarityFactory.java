@@ -2,13 +2,9 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.LMDirichletSimilarity;
-import org.apache.lucene.search.similarities.Similarity;
-import org.apache.lucene.search.similarities.TFIDFSimilarity;
+import org.apache.lucene.search.similarities.*;
 
 public class AnalyzerSimilarityFactory {
-    private final String[] mStopWordList = {"test,test"};
 
     /**
      * This method constructs and returns different types of
@@ -27,7 +23,7 @@ public class AnalyzerSimilarityFactory {
         if(analyzerType.equalsIgnoreCase("whitespace")) {
             return new WhitespaceAnalyzer();
         }
-
+        System.out.println("WARNING! NO VALID ANALYZER SELECTED");
         return null;
     }
 
@@ -42,28 +38,13 @@ public class AnalyzerSimilarityFactory {
         if(similaritiesType.equalsIgnoreCase("bm25")) {
             return new BM25Similarity();
         }
-        if(similaritiesType.equalsIgnoreCase("vsm")) {
-            return new TFIDFSimilarity() {
-                @Override
-                public float tf(float v) {
-                    return 0;
-                }
-
-                @Override
-                public float idf(long l, long l1) {
-                    return 0;
-                }
-
-                @Override
-                public float lengthNorm(int i) {
-                    return 0;
-                }
-            };
+        if(similaritiesType.equalsIgnoreCase("classic")) {
+            return new ClassicSimilarity();
         }
         if(similaritiesType.equalsIgnoreCase("lmd")) {
             return new LMDirichletSimilarity();
         }
-
+        System.out.println("WARNING! NO VALID SIMILARITY SELECTED");
         return null;
     }
 }
