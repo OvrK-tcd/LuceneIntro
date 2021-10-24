@@ -22,8 +22,9 @@ public class CustomAnalyzer extends Analyzer {
         tokenStream = new ASCIIFoldingFilter(tokenStream);
         tokenStream = new LowerCaseFilter(tokenStream);
         tokenStream = new TrimFilter(tokenStream);
-        //tokenStream = new StopFilter(tokenStream, getStopWprds());
+        tokenStream = new StopFilter(tokenStream, getStopWprds());
         tokenStream = new PorterStemFilter(tokenStream);
+        tokenStream = new KStemFilter(tokenStream);
         return new TokenStreamComponents(tokenizer, tokenStream);
     }
 
