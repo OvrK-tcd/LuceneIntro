@@ -44,8 +44,8 @@ public class QueryIndex {
         IndexSearcher indexSearcher = new IndexSearcher(directoryReader);
         indexSearcher.setSimilarity(AnalyzerSimilarityFactory.getSimilarity(mSimilarityString));
         MultiFieldQueryParser parser = new MultiFieldQueryParser(new String[]{FieldNames.TITLE.getName(),
-                FieldNames.AUTHOR.getName(),
-                FieldNames.BIBLIOGRAPHY.getName(),
+                //FieldNames.AUTHOR.getName(),
+                //FieldNames.BIBLIOGRAPHY.getName(),
                 FieldNames.DESCRIPTION.getName()},
                 AnalyzerSimilarityFactory.getAnalyzer(mAnalyzerString));
 

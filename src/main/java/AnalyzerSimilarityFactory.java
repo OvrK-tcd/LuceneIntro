@@ -23,6 +23,10 @@ public class AnalyzerSimilarityFactory {
         if(analyzerType.equalsIgnoreCase("whitespace")) {
             return new WhitespaceAnalyzer();
         }
+        if(analyzerType.equalsIgnoreCase("custom")) {
+            return new CustomAnalyzer();
+        }
+
         System.out.println("WARNING! NO VALID ANALYZER SELECTED");
         return null;
     }

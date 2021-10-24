@@ -91,14 +91,14 @@ public class Parser
                 //extract author
                 String authors = extractPattern(currEntry,"(?<=.A\\n).*?(?=.B\\n)");
                 if(!authors.isEmpty()) {
-                    doc.add(new TextField(FieldNames.AUTHOR.getName(), authors, Field.Store.YES));
+                    //doc.add(new TextField(FieldNames.AUTHOR.getName(), authors, Field.Store.YES));
                     empty = false;
                 }
 
                 //extract bibliography
                 String bibliography = extractPattern(currEntry,"(?<=.B\\n).*?(?=.W\\n)");
                 if(!bibliography.isEmpty()) {
-                    doc.add(new TextField(FieldNames.BIBLIOGRAPHY.getName(), bibliography, Field.Store.YES));
+                    //doc.add(new TextField(FieldNames.BIBLIOGRAPHY.getName(), bibliography, Field.Store.YES));
                     empty = false;
                 }
 
