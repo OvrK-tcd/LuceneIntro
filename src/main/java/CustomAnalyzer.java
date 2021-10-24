@@ -9,6 +9,8 @@ import org.apache.lucene.analysis.standard.ClassicFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tr.ApostropheFilter;
 
+import java.util.Arrays;
+
 public class CustomAnalyzer extends Analyzer {
     private String[] mStopWordList = {
             "a", "an", "and", "are","aren't", "as", "at", "be", "but", "by","can","can't", "does","how",
@@ -18,13 +20,7 @@ public class CustomAnalyzer extends Analyzer {
             "they", "this", "to", "what", "was", "will", "with"
     };
 
-    private CharArraySet mStopWordCharArrayList;
-    CustomAnalyzer() {
-        super();
-        for (String s : mStopWordList) {
-            mStopWordCharArrayList.add(s);
-        }
-    }
+    private CharArraySet mStopWordCharArrayList = new CharArraySet(Arrays.asList(mStopWordList),true);
 
     @Override
     protected TokenStreamComponents createComponents(String fieldName) {
@@ -36,7 +32,6 @@ public class CustomAnalyzer extends Analyzer {
         tokenStream = new HyphenatedWordsFilter(tokenStream);
         tokenStream = new TrimFilter(tokenStream);
         tokenStream = new ASCIIFoldingFilter(tokenStream);
-        System.out.println("stop Word list size: " + mStopWordCharArrayList.size());
         tokenStream = new StopFilter(tokenStream, mStopWordCharArrayList);
         //tokenStream = new PorterStemFilter(tokenStream);
         tokenStream = new KStemFilter(tokenStream);
