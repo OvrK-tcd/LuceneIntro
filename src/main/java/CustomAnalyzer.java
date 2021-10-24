@@ -30,7 +30,7 @@ public class CustomAnalyzer extends Analyzer {
     private CharArraySet getStopWprds(){
         CharArraySet stopwords = null;
         try {
-            byte[] encoded = Files.readAllBytes(Paths.get("../stopwords.txt"));
+            byte[] encoded = Files.readAllBytes(Paths.get("../../../src/stopwords.txt"));
             String[] words = new String(encoded, StandardCharsets.UTF_8).split("\n");
             stopwords =  new CharArraySet(Arrays.asList(words), true);
         } catch (IOException ioe) {
