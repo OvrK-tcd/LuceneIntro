@@ -3,6 +3,7 @@ import org.apache.lucene.analysis.en.EnglishPossessiveFilter;
 import org.apache.lucene.analysis.en.KStemFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
+import org.apache.lucene.analysis.miscellaneous.LengthFilter;
 import org.apache.lucene.analysis.miscellaneous.TrimFilter;
 import org.apache.lucene.analysis.standard.ClassicFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
@@ -18,6 +19,7 @@ public class CustomAnalyzer extends Analyzer {
     protected TokenStreamComponents createComponents(String fieldName) {
         final Tokenizer tokenizer = new StandardTokenizer();
         TokenStream tokenStream = new ClassicFilter(tokenizer);
+        tokenStream = new LengthFilter(tokenStream,2,10);
         tokenStream = new EnglishPossessiveFilter(tokenStream);
         tokenStream = new ASCIIFoldingFilter(tokenStream);
         tokenStream = new LowerCaseFilter(tokenStream);
