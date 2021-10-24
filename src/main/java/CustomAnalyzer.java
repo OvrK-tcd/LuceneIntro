@@ -7,6 +7,7 @@ import org.apache.lucene.analysis.miscellaneous.LengthFilter;
 import org.apache.lucene.analysis.miscellaneous.TrimFilter;
 import org.apache.lucene.analysis.standard.ClassicFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.tr.ApostropheFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +20,7 @@ public class CustomAnalyzer extends Analyzer {
     protected TokenStreamComponents createComponents(String fieldName) {
         final Tokenizer tokenizer = new StandardTokenizer();
         TokenStream tokenStream = new ClassicFilter(tokenizer);
-        tokenStream = new LengthFilter(tokenStream,2,10);
+        tokenStream = new ApostropheFilter(tokenStream);
         tokenStream = new EnglishPossessiveFilter(tokenStream);
         tokenStream = new ASCIIFoldingFilter(tokenStream);
         tokenStream = new LowerCaseFilter(tokenStream);
